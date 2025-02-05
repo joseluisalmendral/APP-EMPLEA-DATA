@@ -20,16 +20,16 @@ const dataTips = [
   "¿Cómo se llama un programador en el gimnasio? ¡Un desarrollador de fuerza!",
   "¿Qué dijo el dataset cuando lo olvidaron? '¡Sin mí, no tienes contexto!'",
   "¿Por qué los científicos de datos aman los ascensores? Porque los elevan a un nivel superior de clustering.",
-    "Un programador va a comprar leche. Su esposa le dice: 'Compra una leche y si hay huevos, compra una docena'. Vuelve con 12 leches. '¿Por qué trajiste 12 leches?' 'Porque había huevos'.",
-    "SQL y NoSQL entran a un bar. SQL pregunta: '¿Puedo unirme a ti?' NoSQL responde: '¡No, gracias!'.",
-    "¿Por qué los científicos de datos son malos en las relaciones? Porque siempre están dividiendo sus datasets.",
-    "¿Cómo se llama un programador en la playa? Un script kiddie.",
-    "¿Por qué los modelos de Machine Learning siempre están tristes? Porque tienen demasiados sesgos.",
-    "Dos bytes entran a un bar y uno le dice al otro: 'Creo que tengo un bug'. El otro responde: 'Sí, te ves un poco desbordado'.",
-    "¿Por qué los programadores prefieren la oscuridad? Porque la luz atrae bugs.",
-    "¿Por qué los programadores de Python nunca discuten? Porque siempre encuentran una solución elegante.",
-    "Un científico de datos entra a una panadería y pide un pan. El panadero pregunta: '¿Cómo lo quiere?'. El científico responde: 'Normalizado, por favor'.",
-    "¿Cómo se llama el primo matemático de Harry Potter? ¡Log-aritmo!"
+  "Un programador va a comprar leche. Su esposa le dice: 'Compra una leche y si hay huevos, compra una docena'. Vuelve con 12 leches. '¿Por qué trajiste 12 leches?' 'Porque había huevos'.",
+  "SQL y NoSQL entran a un bar. SQL pregunta: '¿Puedo unirme a ti?' NoSQL responde: '¡No, gracias!'.",
+  "¿Por qué los científicos de datos son malos en las relaciones? Porque siempre están dividiendo sus datasets.",
+  "¿Cómo se llama un programador en la playa? Un script kiddie.",
+  "¿Por qué los modelos de Machine Learning siempre están tristes? Porque tienen demasiados sesgos.",
+  "Dos bytes entran a un bar y uno le dice al otro: 'Creo que tengo un bug'. El otro responde: 'Sí, te ves un poco desbordado'.",
+  "¿Por qué los programadores prefieren la oscuridad? Porque la luz atrae bugs.",
+  "¿Por qué los programadores de Python nunca discuten? Porque siempre encuentran una solución elegante.",
+  "Un científico de datos entra a una panadería y pide un pan. El panadero pregunta: '¿Cómo lo quiere?'. El científico responde: 'Normalizado, por favor'.",
+  "¿Cómo se llama el primo matemático de Harry Potter? ¡Log-aritmo!"
 ];
 
 const Contact = () => {
@@ -43,6 +43,7 @@ const Contact = () => {
   const [uploadComplete, setUploadComplete] = useState(false);
   const [showTick, setShowTick] = useState(false);
 
+  // Cambia la data tip cada 8 segundos mientras se carga
   useEffect(() => {
     if (loading) {
       const tipInterval = setInterval(() => {
@@ -56,6 +57,19 @@ const Contact = () => {
     }
   }, [loading]);
 
+  // Efecto para realizar scroll automático 3 segundos después de obtener las skills
+  useEffect(() => {
+    if (skills.length > 0) {
+      const scrollTimeout = setTimeout(() => {
+        window.scrollBy({
+          top: 2750, // 250px hacia abajo
+          behavior: "smooth",
+        });
+      }, 3000);
+      return () => clearTimeout(scrollTimeout);
+    }
+  }, [skills]);
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
@@ -68,7 +82,7 @@ const Contact = () => {
     const totalTime = 130;
     const interval = setInterval(() => {
       timeElapsed += 1;
-      setProgress((prev) => Math.min(prev + (100 / totalTime), 100));
+      setProgress((prev) => Math.min(prev + 100 / totalTime, 100));
       if (timeElapsed >= totalTime) {
         clearInterval(interval);
       }
@@ -100,7 +114,7 @@ const Contact = () => {
       console.log("Respuesta de la API:", result);
 
       if (result.skills_detected) {
-        console.log('entro aqui')
+        console.log("Skills detectadas:", result.skills_detected);
         setSkills(result.skills_detected);
         setUploadComplete(true);
         setShowTick(true);
@@ -129,14 +143,19 @@ const Contact = () => {
 
   return (
     <>
-      <div className={`xl:mt-12 flex xl:flex-row flex-col-reverse gap-10`}>
-        <motion.div variants={slideIn("left", "tween", 0.2, 1)} className="flex-[0.75] bg-black-100 p-8 rounded-2xl">
-          <p className={styles.sectionSubText}>Prueba tú mismo!</p>
-          <h3 className={styles.sectionHeadText}>Sube tu archivo</h3>
-  
+      <div className="xl:mt-12 flex xl:flex-row flex-col-reverse gap-10">
+        <motion.div
+          variants={slideIn("left", "tween", 0.2, 1)}
+          className="flex-[0.75] bg-black-100 p-8 rounded-2xl"
+        >
+          <p className={styles.sectionSubText}>¡Prueba tú mismo!</p>
+          <h3 className={styles.sectionHeadText}>Sube tu CV!</h3>
+
           <form ref={formRef} onSubmit={handleSubmit} className="mt-12 flex flex-col gap-8">
             <label className="flex flex-col">
-              <span className="text-white font-medium mb-4">Sube tu archivo (.pdf, .png, .jpg, .jpeg)</span>
+              <span className="text-white font-medium mb-4">
+                Sube tu archivo (.pdf, .png, .jpg, .jpeg)
+              </span>
               <input
                 type="file"
                 accept=".pdf,.png,.jpg,.jpeg"
@@ -144,7 +163,7 @@ const Contact = () => {
                 className="bg-tertiary py-4 px-6 text-white rounded-lg outline-none border-none font-medium cursor-pointer"
               />
             </label>
-  
+
             {loading && (
               <div className="flex flex-col items-center">
                 {!showTick ? (
@@ -152,7 +171,7 @@ const Contact = () => {
                 ) : (
                   <CheckCircle className="text-green-500 w-10 h-10 mb-4" />
                 )}
-                <div className={`w-full bg-gray-700 rounded-full h-4 ${showTick ? 'hidden' : ''}`}>
+                <div className={`w-full bg-gray-700 rounded-full h-4 ${showTick ? "hidden" : ""}`}>
                   <div
                     className="bg-green-500 h-4 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
@@ -162,7 +181,7 @@ const Contact = () => {
                 <p className="text-white text-center mt-1">{dataTip}</p>
               </div>
             )}
-  
+
             <button
               type="submit"
               className="bg-tertiary py-3 px-8 rounded-xl outline-none w-fit text-white font-bold shadow-md shadow-primary"
@@ -170,13 +189,40 @@ const Contact = () => {
               {loading ? "Cargando..." : "Enviar"}
             </button>
           </form>
+
+          {/* Tabla con las skills identificadas por la API */}
+          {skills.length > 0 && (
+            <div className="mt-8">
+              <h4 className="text-white font-bold mb-2">Skills identificadas:</h4>
+              <table className="min-w-full bg-gray-700 text-white">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2">#</th>
+                    <th className="px-4 py-2">Skill</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {skills.map((skill, index) => (
+                    <tr key={index}>
+                      <td className="border px-4 py-2">{index + 1}</td>
+                      <td className="border px-4 py-2">{skill}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </motion.div>
-  
-        <motion.div variants={slideIn("right", "tween", 0.2, 1)} className="xl:flex-1 xl:h-auto md:h-[550px] h-[350px]">
+
+        <motion.div
+          variants={slideIn("right", "tween", 0.2, 1)}
+          className="xl:flex-1 xl:h-auto md:h-[550px] h-[350px]"
+        >
           <EarthCanvas />
         </motion.div>
       </div>
-  
+
+      {/* Opcional: Render de JobRecommendations */}
       {skills.length > 0 && <JobRecommendations skills={skills} />}
     </>
   );
