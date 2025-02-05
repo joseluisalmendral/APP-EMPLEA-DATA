@@ -1,12 +1,15 @@
 {
   "name": "3dfolio",
+  "homepage": "https://joseluisalmendral.github.io/APP-EMPLEA-DATA/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@emailjs/browser": "^3.10.0",
@@ -14,6 +17,7 @@
     "@react-three/fiber": "^8.11.1",
     "3dfolio": "file:",
     "framer-motion": "^9.0.7",
+    "gh-pages": "^6.3.0",
     "lucide-react": "^0.474.0",
     "maath": "^0.5.2",
     "react": "^18.2.0",
