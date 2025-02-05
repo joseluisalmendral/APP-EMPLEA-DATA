@@ -3,6 +3,7 @@ import Hero from "./Hero";
 import Navbar from "./Navbar";
 import About from "./About";
 import BarChartComponent from './BarChart';
+import JobRecommendations from './JobRecommendations';
 import Tech from "./Tech";
 import Experience from "./Experience";
 import Works from "./Works";
@@ -16,6 +17,7 @@ export {
   Navbar,
   About,
   BarChartComponent,
+  JobRecommendations,
   Tech,
   Experience,
   Works,
