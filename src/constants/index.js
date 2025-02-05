@@ -172,25 +172,25 @@ const experiences = [
 const testimonials = [
   {
     testimonial:
-      "I thought it was impossible to make a website as beautiful as our product, but Rick proved me wrong.",
-    name: "Sara Lee",
-    designation: "CFO",
+      "Gracias a EMPLEA/DATA, descubrí las áreas que necesitaba mejorar para ser más empleable. ¡En menos de un mes recibí dos ofertas de trabajo alineadas con mis habilidades! Es como tener un mentor en tu bolsillo.",
+    name: "María López",
+    designation: "Analista de Datos Junior",
     company: "Acme Co",
     image: "https://randomuser.me/api/portraits/women/4.jpg",
   },
   {
     testimonial:
-      "I've never met a web developer who truly cares about their clients' success like Rick does.",
-    name: "Chris Brown",
-    designation: "COO",
+      "Me sorprendió lo precisa que es la aplicación al recomendar ofertas. Me mostró oportunidades que no había encontrado en otros sitios y me ayudó a entender mejor dónde encajo en el mercado laboral.",
+    name: "Juan Pérez",
+    designation: "Científico de Datos",
     company: "DEF Corp",
     image: "https://randomuser.me/api/portraits/men/5.jpg",
   },
   {
     testimonial:
-      "After Rick optimized our website, our traffic increased by 50%. We can't thank them enough!",
-    name: "Lisa Wang",
-    designation: "CTO",
+      "Esta herramienta me dio una visión clara del mercado laboral y me ayudó a saber exactamente qué habilidades desarrollar. Gracias a sus recomendaciones personalizadas, conseguí mi primera pasantía en una empresa de tecnología",
+    name: "Ana Rodríguez",
+    designation: "Estudiante de Ciencia de Datos",
     company: "456 Enterprises",
     image: "https://randomuser.me/api/portraits/women/6.jpg",
   },
