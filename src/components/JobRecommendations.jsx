@@ -122,33 +122,46 @@ const JobRecommendations = ({ skills }) => {
               {jobs.map((job) => (
                 <div key={job._id} className="bg-white shadow-lg rounded-lg p-6 text-gray-900">
                   {/* Título y Empresa */}
-                  <h2 className="text-2xl font-bold mb-2">{job.Titulo}</h2>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h2 className="text-3xl font-bold mb-2">{job.Titulo}</h2>
+                  <p className="text-base text-gray-600 mb-4">
                     {job.Empresa} - {job.Ubicacion}
                   </p>
 
-                  {/* Información Principal */}
-                  <div className="mb-4">
-                    <p>
-                      <span className="font-semibold">Salario:</span>{" "}
-                      {Array.isArray(job.Salario) ? job.Salario.join(", ") : job.Salario}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Experiencia mínima:</span> {job["Experiencia minima"]}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Tipo de contrato:</span> {job["Tipo de contrato"]}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Estudios mínimos:</span>{" "}
-                      {Array.isArray(job["Estudios minimos"])
-                        ? job["Estudios minimos"].join(", ")
-                        : job["Estudios minimos"]}
-                    </p>
+                  <div className="flex gap-10">
+                    {/* Información Principal */}
+                    <div className="mb-4">
+                      <p>
+                        <span className="text-lg font-semibold">Salario:</span>{" "}
+                        {Array.isArray(job.Salario) ? job.Salario.join(" - ") : job.Salario}
+                      </p>
+                      <p>
+                        <span className="text-lg font-semibold">Experiencia mínima:</span> {job["Experiencia minima"]}
+                      </p>
+                      <p>
+                        <span className="text-lg font-semibold">Tipo de contrato:</span> {job["Tipo de contrato"]}
+                      </p>
+                      <p>
+                        <span className="text-lg font-semibold">Estudios mínimos:</span>{" "}
+                        {Array.isArray(job["Estudios minimos"])
+                          ? job["Estudios minimos"].join(", ")
+                          : job["Estudios minimos"]}
+                      </p>
+                    </div>
+
+                    {/* Skills del Job */}
+                    <div>
+                      <p className="text-lg font-semibold mb-2 flex items-center gap-4">Skills: 
+                        {job.Skills.map((skill, index) => (
+                          <span key={index} className="text-sm px-2 py-1 text-stone-950 bg-violet-100 border border-slate-800 rounded ">{skill}</span>
+                        ))}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Descripción */}
+                  <p class="text-xl font-semibold">Descripción</p>
                   <p className="mb-4">{job.Descripcion}</p>
+
 
                   {/* Datos Adicionales */}
                   <div className="text-sm text-gray-500 mb-4">
@@ -166,15 +179,6 @@ const JobRecommendations = ({ skills }) => {
                     </p>
                   </div>
 
-                  {/* Skills del Job */}
-                  <div>
-                    <p className="font-semibold mb-2">Skills:</p>
-                    <ul className="list-disc list-inside">
-                      {job.Skills.map((skill, index) => (
-                        <li key={index}>{skill}</li>
-                      ))}
-                    </ul>
-                  </div>
                 </div>
               ))}
             </div>
