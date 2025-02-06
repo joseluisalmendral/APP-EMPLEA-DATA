@@ -36,7 +36,7 @@ const Contact = () => {
     if (skills.length > 0) {
       const scrollTimeout = setTimeout(() => {
         window.scrollBy({
-          top: 850, // desplaza hacia abajo
+          top: 750, // desplaza hacia abajo
           behavior: "smooth",
         });
       }, 3000);
@@ -53,7 +53,7 @@ const Contact = () => {
   const simulateProgress = () => {
     setProgress(0);
     let timeElapsed = 0;
-    const totalTime = 130; // tiempo total en segundos (puedes ajustar para pruebas)
+    const totalTime = 180; // tiempo total en segundos (puedes ajustar para pruebas)
     const interval = setInterval(() => {
       timeElapsed += 1;
       setProgress((prev) => Math.min(prev + 100 / totalTime, 100));
@@ -73,7 +73,7 @@ const Contact = () => {
 
     // Simulamos un retardo en la respuesta de la API (por ejemplo, 2 segundos)
     setTimeout(() => {
-      const simulatedSkills = ["excel"];
+      const simulatedSkills = ["excel", 'powerbi'];
       console.log("Simulación de API, skills recibidas:", simulatedSkills);
       setSkills(simulatedSkills);
       setUploadComplete(true);

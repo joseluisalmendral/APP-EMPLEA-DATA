@@ -182,36 +182,50 @@ const JobRecommendations = ({ skills }) => {
 
   return (
     <div className="mt-10 p-6 bg-gray-800 text-white rounded-xl">
-      {/* Selector de Categoría centrado */}
-      <div className="mb-4 flex flex-col items-center">
-        <label htmlFor="category-selector" className="block mb-2 font-bold text-center">
-          Selecciona una categoría:
-        </label>
-        <select
-          id="category-selector"
-          className="p-2 rounded bg-white text-black text-center"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          {categories.map((category, index) => (
-            <option key={index} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
+      {/* Contenedor para selector de categoría a la izquierda y ofertas totales a la derecha */}
+      <div className="mb-8 flex flex-col md:flex-row items-center justify-around">
+        <div className="flex items-center gap-4">
+          <label htmlFor="category-selector" className="text-2xl mt-1 block mb-2 font-bold">
+            Categoría:
+          </label>
+          <select
+            id="category-selector"
+            className="p-2 rounded bg-white text-black"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            {categories.map((category, index) => (
+              <option key={index} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mt-4 text-2xl md:mt-0">
+          <span className="font-bold">Ofertas Totales: </span>
+          <span>{weightedData ? weightedData.total_offers : 0}</span>
+        </div>
       </div>
 
       {/* Contenedor responsivo para las dos tablas */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Tabla de Skills Identificadas */}
         <div className="w-full md:w-1/2">
-          <h4 className="font-bold mb-2 text-center">Skills Identificadas</h4>
+          <h3 className="text-lg font-bold mb-2 text-center">Skills Identificadas</h3>
           <table className="min-w-full bg-gray-700 mt-4 rounded">
             <thead>
               <tr>
                 <th className="px-4 py-2 text-center">Acciones</th>
                 <th className="px-4 py-2 text-center">Skill Identificada</th>
-                <th className="px-4 py-2 text-center">Demanda</th>
+                <th className="px-4 py-2 text-center">
+                  Demanda
+                  <span
+                    className="ml-1 text-blue-400 cursor-pointer"
+                    title="El número de la izquierda corresponde al número de ofertas en las que aparece esa skill y el número de la derecha es el porcentaje frente al total."
+                  >
+                    ?
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -236,7 +250,7 @@ const JobRecommendations = ({ skills }) => {
         {/* Tabla de Skills Recomendadas */}
         <div className="w-full md:w-1/2">
           <div className="flex text-center gap-3 justify-center items-center mb-2">
-            <h4 className="font-bold text-center">Skills Recomendadas</h4>
+            <h4 className="text-lg font-bold text-center">Skills Recomendadas</h4>
             <div className="mt-1">
               <input
                 id="numRecommended"
@@ -250,11 +264,19 @@ const JobRecommendations = ({ skills }) => {
               />
             </div>
           </div>
-          <table className="min-w-full bg-gray-700 rounded">
+          <table className="mt-3 min-w-full bg-gray-700 rounded">
             <thead>
               <tr>
                 <th className="px-4 py-2 text-center">Skill Recomendadas</th>
-                <th className="px-4 py-2 text-center">Demanda</th>
+                <th className="px-4 py-2 text-center">
+                  Demanda
+                  <span
+                    className="ml-1 text-blue-400 cursor-pointer"
+                    title="El número de la izquierda corresponde al número de ofertas en las que aparece esa skill y el número de la derecha es el porcentaje frente al total."
+                  >
+                    ?
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -305,7 +327,7 @@ const JobRecommendations = ({ skills }) => {
                   <div className="mb-4">
                     <p>
                       <span className="text-lg font-semibold">Salario:</span>{" "}
-                      {Array.isArray(job.Salario) ? job.Salario.join(" - ") : job.Salario}
+                      {Array.isArray(job.Salario) ? job.Salario.join("€  - ") + "€" : job.Salario}
                     </p>
                     <p>
                       <span className="text-lg font-semibold">Experiencia mínima:</span>{" "}
@@ -339,9 +361,13 @@ const JobRecommendations = ({ skills }) => {
                   </div>
                 </div>
 
-                {/* Descripción */}
+                {/* Descripción truncada a 3 líneas, mostrando el resto al pasar el cursor */}
                 <p className="text-xl font-semibold">Descripción</p>
-                <p className="mb-4">{job.Descripcion}</p>
+                <div className="group">
+                  <p className="mb-4 max-h-[4.5rem] overflow-hidden transition-all duration-[670ms] ease-in-out group-hover:max-h-[500px]">
+                    {job.Descripcion}
+                  </p>
+                </div>
 
                 {/* Datos Adicionales */}
                 <div className="flex items-center justify-between">
@@ -360,8 +386,14 @@ const JobRecommendations = ({ skills }) => {
                     </p>
                   </div>
 
-                  <a target="_blank" className="py-4 px-2 text-white bg-purple-700 font-semibold border border-purple-800 rounded hover:text-lg transition-all" href="https://www.infojobs.net/"
-                  style={{marginLeft: '-600px !important'}}>Ver Oferta</a>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="md:mr-5 py-4 px-2 text-white bg-purple-700 font-semibold border border-purple-800 rounded hover:text-lg transition-all"
+                    href="https://www.infojobs.net/"
+                  >
+                    Ver Oferta
+                  </a>
                 </div>
               </div>
             ))}
