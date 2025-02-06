@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-
 const JobRecommendations = ({ skills }) => {
   // Estado para controlar la carga y almacenar los detalles de los trabajos
   const [loading, setLoading] = useState(false);
@@ -90,6 +89,29 @@ const JobRecommendations = ({ skills }) => {
 
   return (
     <div className="mt-10 p-6 bg-gray-800 text-white rounded-xl">
+      {/* Tabla de Skills identificadas */}
+      {skills && skills.length > 0 && (
+        <div className="mb-6">
+          <h4 className="font-bold mb-2">Skills identificadas:</h4>
+          <table className="min-w-full bg-gray-700">
+            <thead>
+              <tr>
+                <th className="px-4 py-2">#</th>
+                <th className="px-4 py-2">Skill</th>
+              </tr>
+            </thead>
+            <tbody>
+              {skills.map((skill, index) => (
+                <tr key={index}>
+                  <td className="border px-4 py-2">{index + 1}</td>
+                  <td className="border px-4 py-2">{skill}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {loading ? (
         <p>Obteniendo las mejores ofertas para ti...</p>
       ) : (
@@ -144,7 +166,7 @@ const JobRecommendations = ({ skills }) => {
                     </p>
                   </div>
 
-                  {/* Skills */}
+                  {/* Skills del Job */}
                   <div>
                     <p className="font-semibold mb-2">Skills:</p>
                     <ul className="list-disc list-inside">

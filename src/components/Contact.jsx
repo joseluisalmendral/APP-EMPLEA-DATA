@@ -6,63 +6,37 @@ import { SectionWrapper } from "../hoc";
 import { slideIn } from "../utils/motion";
 import JobRecommendations from "./JobRecommendations";
 import { CheckCircle } from "lucide-react";
-
-const dataTips = [
-  "Divide y vencerás: separa tu código en funciones pequeñas y reutilizables.",
-  "Comenta tu código, pero solo cuando sea realmente necesario.",
-  "Las bases de datos indexadas mejoran la velocidad de las consultas.",
-  "Aprende a escribir código limpio y mantenible, tu yo futuro te lo agradecerá.",
-  "Usa estructuras de datos adecuadas para cada problema.",
-  "Versiona tu código con Git para evitar pérdidas y facilitar el trabajo en equipo.",
-  "Automatiza tareas repetitivas para ahorrar tiempo.",
-  "Mantén tus dependencias actualizadas y revisa su seguridad.",
-  "¿Por qué los programadores siempre confunden Navidad y Halloween? Porque Oct 31 == Dec 25!",
-  "¿Cómo se llama un programador en el gimnasio? ¡Un desarrollador de fuerza!",
-  "¿Qué dijo el dataset cuando lo olvidaron? '¡Sin mí, no tienes contexto!'",
-  "¿Por qué los científicos de datos aman los ascensores? Porque los elevan a un nivel superior de clustering.",
-  "Un programador va a comprar leche. Su esposa le dice: 'Compra una leche y si hay huevos, compra una docena'. Vuelve con 12 leches. '¿Por qué trajiste 12 leches?' 'Porque había huevos'.",
-  "SQL y NoSQL entran a un bar. SQL pregunta: '¿Puedo unirme a ti?' NoSQL responde: '¡No, gracias!'.",
-  "¿Por qué los científicos de datos son malos en las relaciones? Porque siempre están dividiendo sus datasets.",
-  "¿Cómo se llama un programador en la playa? Un script kiddie.",
-  "¿Por qué los modelos de Machine Learning siempre están tristes? Porque tienen demasiados sesgos.",
-  "Dos bytes entran a un bar y uno le dice al otro: 'Creo que tengo un bug'. El otro responde: 'Sí, te ves un poco desbordado'.",
-  "¿Por qué los programadores prefieren la oscuridad? Porque la luz atrae bugs.",
-  "¿Por qué los programadores de Python nunca discuten? Porque siempre encuentran una solución elegante.",
-  "Un científico de datos entra a una panadería y pide un pan. El panadero pregunta: '¿Cómo lo quiere?'. El científico responde: 'Normalizado, por favor'.",
-  "¿Cómo se llama el primo matemático de Harry Potter? ¡Log-aritmo!"
-];
+import { dataTips } from "../constants";
 
 const Contact = () => {
   const formRef = useRef();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [skills, setSkills] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
   const [dataTip, setDataTip] = useState(dataTips[0]);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [showTick, setShowTick] = useState(false);
+  const [skills, setSkills] = useState([]);
 
-  // Cambia la data tip cada 8 segundos mientras se carga
+  // Actualiza dataTip de forma aleatoria cada 9 segundos cuando se está cargando
   useEffect(() => {
     if (loading) {
       const tipInterval = setInterval(() => {
-        setDataTip((prevTip) => {
-          const nextIndex = (dataTips.indexOf(prevTip) + 1) % dataTips.length;
-          return dataTips[nextIndex];
-        });
-      }, 8000);
+        const randomIndex = Math.floor(Math.random() * dataTips.length);
+        setDataTip(dataTips[randomIndex]);
+      }, 9000);
 
       return () => clearInterval(tipInterval);
     }
   }, [loading]);
 
-  // Efecto para realizar scroll automático 3 segundos después de obtener las skills
+  // Realiza scroll automático 3 segundos después de obtener las skills
   useEffect(() => {
     if (skills.length > 0) {
       const scrollTimeout = setTimeout(() => {
         window.scrollBy({
-          top: 2750, // 250px hacia abajo
+          top: 2750, // desplaza hacia abajo
           behavior: "smooth",
         });
       }, 3000);
@@ -79,7 +53,7 @@ const Contact = () => {
   const simulateProgress = () => {
     setProgress(0);
     let timeElapsed = 0;
-    const totalTime = 130;
+    const totalTime = 130; // tiempo total en segundos (puedes ajustar para pruebas)
     const interval = setInterval(() => {
       timeElapsed += 1;
       setProgress((prev) => Math.min(prev + 100 / totalTime, 100));
@@ -90,6 +64,35 @@ const Contact = () => {
     setIntervalId(interval);
   };
 
+  // Función para simular la llamada a la API de procesamiento del CV
+  const simulateApiCall = () => {
+    console.log("Simulación de API activada");
+    setLoading(true);
+    setUploadComplete(false);
+    simulateProgress();
+
+    // Simulamos un retardo en la respuesta de la API (por ejemplo, 2 segundos)
+    setTimeout(() => {
+      const simulatedSkills = ["sql", "python", "excell"];
+      console.log("Simulación de API, skills recibidas:", simulatedSkills);
+      setSkills(simulatedSkills);
+      setUploadComplete(true);
+      setShowTick(true);
+      clearInterval(intervalId);
+      setProgress(100);
+      // Mostramos el tick verde y luego reseteamos el estado
+      setTimeout(() => {
+        setShowTick(false);
+        setProgress(0);
+        setLoading(false);
+        // Reiniciamos el formulario y eliminamos el archivo seleccionado
+        if (formRef.current) formRef.current.reset();
+        setFile(null);
+      }, 1500);
+    }, 2000);
+  };
+
+  // Función original para enviar el CV a la API real
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
@@ -129,7 +132,7 @@ const Contact = () => {
 
       setTimeout(() => {
         setLoading(false);
-        formRef.current.reset();
+        if (formRef.current) formRef.current.reset();
         setFile(null);
       }, 500);
     } catch (error) {
@@ -140,6 +143,39 @@ const Contact = () => {
       alert("Error al procesar el archivo.");
     }
   };
+
+  // useEffect para detectar la combinación de teclas (a, s, d, f)
+  useEffect(() => {
+    const pressedKeys = new Set();
+
+    const keydownHandler = (e) => {
+      pressedKeys.add(e.key.toLowerCase());
+      // Si se han presionado a, s, d y f al mismo tiempo
+      if (
+        pressedKeys.has("a") &&
+        pressedKeys.has("s") &&
+        pressedKeys.has("d") &&
+        pressedKeys.has("f")
+      ) {
+        // Solo si no se está ya cargando (para evitar múltiples simulaciones)
+        if (!loading) {
+          simulateApiCall();
+        }
+      }
+    };
+
+    const keyupHandler = (e) => {
+      pressedKeys.delete(e.key.toLowerCase());
+    };
+
+    document.addEventListener("keydown", keydownHandler);
+    document.addEventListener("keyup", keyupHandler);
+
+    return () => {
+      document.removeEventListener("keydown", keydownHandler);
+      document.removeEventListener("keyup", keyupHandler);
+    };
+  }, [loading, intervalId]);
 
   return (
     <>
@@ -189,29 +225,6 @@ const Contact = () => {
               {loading ? "Cargando..." : "Enviar"}
             </button>
           </form>
-
-          {/* Tabla con las skills identificadas por la API */}
-          {skills.length > 0 && (
-            <div className="mt-8">
-              <h4 className="text-white font-bold mb-2">Skills identificadas:</h4>
-              <table className="min-w-full bg-gray-700 text-white">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2">#</th>
-                    <th className="px-4 py-2">Skill</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {skills.map((skill, index) => (
-                    <tr key={index}>
-                      <td className="border px-4 py-2">{index + 1}</td>
-                      <td className="border px-4 py-2">{skill}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </motion.div>
 
         <motion.div
@@ -222,7 +235,7 @@ const Contact = () => {
         </motion.div>
       </div>
 
-      {/* Opcional: Render de JobRecommendations */}
+      {/* Render de JobRecommendations: se activa cuando hay skills */}
       {skills.length > 0 && <JobRecommendations skills={skills} />}
     </>
   );

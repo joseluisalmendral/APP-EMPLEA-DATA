@@ -1,28 +1,39 @@
 import { BrowserRouter } from "react-router-dom";
-
-import { About, Contact, Experience, BarChartComponent, Feedbacks, Hero, Navbar, Tech, Works, StarsCanvas } from "./components";
+import {
+  About,
+  Contact,
+  BarChartComponent,
+  Feedbacks,
+  Hero,
+  Navbar,
+  Tech,
+  StarsCanvas,
+} from "./components";
 
 const App = () => {
   return (
     <BrowserRouter>
-      <div className='relative z-0 bg-primary'>
-        <div className='bg-hero-pattern bg-cover bg-no-repeat bg-center'>
+      <div className="relative z-0 bg-primary overflow-hidden">
+        <div className="bg-hero-pattern bg-cover bg-no-repeat bg-center">
           <Navbar />
           <Hero />
         </div>
         <About />
         <BarChartComponent />
-        {/* <Experience /> */}
         <Tech />
-        {/* <Works /> */}
         <Feedbacks />
-        <div className='relative z-0'>
-          <Contact />
-          <StarsCanvas />
-        </div>
+        <Contact />
+        <StarsCanvasWrapper />
       </div>
     </BrowserRouter>
   );
-}
+};
+
+// Contenedor fijo para el StarsCanvas
+const StarsCanvasWrapper = () => (
+  <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-[-1]">
+    <StarsCanvas />
+  </div>
+);
 
 export default App;

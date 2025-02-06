@@ -106,7 +106,7 @@ En el archivo `package.json` encontrarás varios scripts que pueden ejecutarse d
 
 ## Licencia y créditos
 
-- El modelo **Gaming Desktop PC** se distribuye bajo licencia [CC-BY-4.0](http://creativecommons.org/licenses/by/4.0/).  
+- El modelo **Gaming Desktop PC** se distribuye bajo licencia [CC-BY-4.0 ](http://creativecommons.org/licenses/by/4.0/).  
   El crédito es obligatorio y **puedes usarlo con fines comerciales** siempre que menciones al autor.  
   > Más detalles en el archivo [license.txt](public/desktop_pc/license.txt).
 

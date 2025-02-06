@@ -262,4 +262,45 @@ const projects = [
   },
 ];
 
-export { services, technologies, experiences, testimonials, projects };
+const dataTips = [
+  // Buenas prácticas y consejos
+  "Divide y vencerás: separa tu código en funciones pequeñas y reutilizables.",
+  "Comenta tu código, pero solo cuando sea realmente necesario.",
+  "Las bases de datos indexadas mejoran la velocidad de las consultas.",
+  "Aprende a escribir código limpio y mantenible, tu yo futuro te lo agradecerá.",
+  "Usa estructuras de datos adecuadas para cada problema.",
+  "Versiona tu código con Git para evitar pérdidas y facilitar el trabajo en equipo.",
+  "Automatiza tareas repetitivas para ahorrar tiempo.",
+  "Mantén tus dependencias actualizadas y revisa su seguridad.",
+  "Recuerda: el 90% de los bugs se deben a un 10% del código, ¡así que revisa esa parte con lupa!",
+  "La documentación es como un mapa del tesoro: imprescindible, pero a veces tan enigmático como un laberinto.",
+  "El testing es el héroe no reconocido de cualquier aplicación: sin él, el caos reinaría.",
+  
+  // Chistes para el buen humor
+  "¿Por qué los programadores siempre confunden Navidad y Halloween? Porque Oct 31 == Dec 25!",
+  "¿Cómo se llama un programador en el gimnasio? ¡Un desarrollador de fuerza!",
+  "¿Qué dijo el dataset cuando lo olvidaron? '¡Sin mí, no tienes contexto!'",
+  "¿Por qué los científicos de datos aman los ascensores? Porque los elevan a un nivel superior de clustering.",
+  "Un programador va a comprar leche. Su esposa le dice: 'Compra una leche y si hay huevos, compra una docena'. Vuelve con 12 leches. '¿Por qué trajiste 12 leches?' 'Porque había huevos'.",
+  "SQL y NoSQL entran a un bar. SQL pregunta: '¿Puedo unirme a ti?' NoSQL responde: '¡No, gracias!'",
+  "¿Por qué los científicos de datos son malos en las relaciones? Porque siempre están dividiendo sus datasets.",
+  "¿Cómo se llama un programador en la playa? Un script kiddie.",
+  "¿Por qué los modelos de Machine Learning siempre están tristes? Porque tienen demasiados sesgos.",
+  "Dos bytes entran a un bar y uno le dice al otro: 'Creo que tengo un bug'. El otro responde: 'Sí, te ves un poco desbordado'.",
+  "¿Por qué los programadores prefieren la oscuridad? Porque la luz atrae bugs.",
+  "¿Por qué los programadores de Python nunca discuten? Porque siempre encuentran una solución elegante.",
+  "Un científico de datos entra a una panadería y pide un pan. El panadero pregunta: '¿Cómo lo quiere?'. El científico responde: 'Normalizado, por favor'.",
+  "¿Cómo se llama el primo matemático de Harry Potter? ¡Log-aritmo!",
+  
+  // Más curiosidades y humor
+  "El hardware es la parte visible del iceberg; el software es el océano que lo sostiene.",
+  "La depuración es como ser detective: cada pista en el código te acerca al misterioso bug.",
+  "¿Qué le dijo el código al desarrollador? 'No me molestes, estoy en producción'.",
+  "Un día, un desarrollador dijo: '¡Viva el open source!' y su computadora respondió: '¡Yo también, en mi kernel!'",
+  "El aprendizaje continuo es el mantra de todo buen programador: ¡nunca dejes de hackear tu mente!",
+  "¿Por qué el programador se quedó mirando su reloj? Porque esperaba que su bug tuviera un 'timeout'.",
+  "¿Cuál es el colmo de un programador? Que su vida no compile con sus expectativas."
+];
+
+
+export { services, technologies, experiences, testimonials, projects, dataTips };
