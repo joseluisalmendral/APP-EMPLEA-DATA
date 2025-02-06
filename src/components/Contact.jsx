@@ -36,7 +36,7 @@ const Contact = () => {
     if (skills.length > 0) {
       const scrollTimeout = setTimeout(() => {
         window.scrollBy({
-          top: 2750, // desplaza hacia abajo
+          top: 850, // desplaza hacia abajo
           behavior: "smooth",
         });
       }, 3000);
@@ -73,7 +73,7 @@ const Contact = () => {
 
     // Simulamos un retardo en la respuesta de la API (por ejemplo, 2 segundos)
     setTimeout(() => {
-      const simulatedSkills = ["sql", "python", "excell"];
+      const simulatedSkills = ["excel"];
       console.log("Simulación de API, skills recibidas:", simulatedSkills);
       setSkills(simulatedSkills);
       setUploadComplete(true);
