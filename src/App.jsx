@@ -10,6 +10,8 @@ import {
   Tech,
   StarsCanvas,
 } from "./components";
+import JobOffersChartOverTime from "./components/charts/JobOffersChartOverTime";
+import LocationDistributionChart from "./components/charts/LocationDistributionChart";
 
 const App = () => {
   useEffect(() => {
@@ -44,6 +46,8 @@ const App = () => {
           <Hero />
         </div>
         <About />
+        <JobOffersChartOverTime />
+        <LocationDistributionChart />
         <Tech />
         <Feedbacks />
         <Contact />

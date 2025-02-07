@@ -28,7 +28,7 @@ const JobOffersChartOverTime = ({ data }) => {
       whileInView="show"
       className="mt-10"
       >
-      <h2 className="text-white text-center text-4xl font-bold mb-6">
+      <h2 className="text-white text-center text-4xl font-bold mb-4">
         Ofertas de Trabajo a lo largo del tiempo
       </h2>
       <ResponsiveContainer width="100%" height={450} style={{fontSize: "20px", backgroundColor: "transparent", padding: "10px 0px", borderRadius: "10px"}}>
@@ -46,7 +46,7 @@ const JobOffersChartOverTime = ({ data }) => {
             dataKey="Data Security & Privacy"
             stroke="#ff7300"
           />
-          <Brush stroke="#83ad6c" />
+            <Brush stroke="#e032e6"  />
         </LineChart>
       </ResponsiveContainer>
     </motion.div>

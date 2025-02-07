@@ -6,7 +6,7 @@ import { styles } from "../styles";
 import { services } from "../constants";
 import { SectionWrapper } from "../hoc";
 import { fadeIn, textVariant } from "../utils/motion";
-import JobOffersChartOverTime from "./charts/JobOffersChartOverTime";
+
 
 const ServiceCard = ({ index, title, icon }) => (
   <Tilt 
@@ -46,7 +46,7 @@ const About = () => {
 
       <motion.p
         variants={fadeIn("", "", 0.1, 1)}
-        className='mt-3 text-secondary text-[20px] max-w-5xl leading-[32px]'
+        className="mt-3 text-secondary text-[20px] max-w-5xl leading-[32px]"
       >
         En un mundo impulsado por los datos, identificar las oportunidades laborales adecuadas puede ser un desafío. 
         ¿Qué puestos son los más demandados? ¿Qué habilidades necesitas para destacar en cada rol? Nuestra plataforma 
@@ -55,13 +55,12 @@ const About = () => {
         que están dando forma al futuro. ¡Empieza tu viaje hacia una carrera en datos hoy mismo!
       </motion.p>
 
-      <div className='mt-20 flex flex-wrap gap-10'>
+      <div className="mt-20 flex flex-wrap gap-10">
         {services.map((service, index) => (
           <ServiceCard key={service.title} index={index} {...service} />
         ))}
       </div>
 
-      <JobOffersChartOverTime />
     </>
   );
 };

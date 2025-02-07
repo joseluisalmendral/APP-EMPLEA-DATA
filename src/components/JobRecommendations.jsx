@@ -5,7 +5,7 @@ const JobRecommendations = ({ skills }) => {
   const [jobs, setJobs] = useState([]);
   const [allJobIds, setAllJobIds] = useState([]);
   const [jobOffset, setJobOffset] = useState(0);
-  const [jobsPerPage, setJobsPerPage] = useState(10);
+  const [jobsPerPage, setJobsPerPage] = useState(3);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
 
