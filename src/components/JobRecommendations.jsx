@@ -1,4 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
+import {
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const JobRecommendations = ({ skills }) => {
   // Estados para trabajos y paginación
@@ -275,6 +286,36 @@ const JobRecommendations = ({ skills }) => {
           <span>{weightedData ? weightedData.total_offers : 0}</span>
         </div>
       </div>
+
+      {/* Gráfico de Skills más demandadas */}
+      {weightedData && weightedData.weighted_skills && (
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-center mb-4">Skills más demandadas</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={weightedData.weighted_skills} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+              <XAxis dataKey="skill" tick={{ fill: "#fff" }} />
+              <YAxis tick={{ fill: "#fff" }} />
+              <Tooltip contentStyle={{ backgroundColor: "#333", border: "none" }} labelStyle={{ color: "#fff" }} />
+              <Legend wrapperStyle={{ color: "#fff" }} />
+              <Bar dataKey="count">
+                {weightedData.weighted_skills.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      userSkills.some(
+                        (us) => us.toLowerCase() === entry.skill.toLowerCase()
+                      )
+                        ? "#82ca9d" // Color resaltado para skills identificadas
+                        : "#8884d8" // Color por defecto para el resto
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Contenedor responsivo para las tablas de Skills Identificadas y Recomendadas */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
