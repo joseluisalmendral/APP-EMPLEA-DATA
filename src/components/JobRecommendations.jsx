@@ -1,18 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 const JobRecommendations = ({ skills }) => {
-  // Estados para los trabajos
-  const [loading, setLoading] = useState(false);
+  // Estados para trabajos y paginación
   const [jobs, setJobs] = useState([]);
+  const [allJobIds, setAllJobIds] = useState([]);
+  const [jobOffset, setJobOffset] = useState(0);
+  const [jobsPerPage, setJobsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  // Estados para categorías, weighted skills, skills del usuario y número de skills recomendadas
+  // Otros estados (categorías, weighted skills, skills del usuario, número de skills recomendadas)
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [weightedData, setWeightedData] = useState(null);
   const [userSkills, setUserSkills] = useState(skills);
-  const [numRecommended, setNumRecommended] = useState(5); // Número de skills recomendadas a mostrar
+  const [numRecommended, setNumRecommended] = useState(5);
 
-  // Obtener las categorías desde la API al montar el componente
+  // Ref para el contenedor del spinner (loader)
+  const loaderRef = useRef(null);
+
+  // --- Categorías y weighted skills ---
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -33,7 +40,6 @@ const JobRecommendations = ({ skills }) => {
     fetchCategories();
   }, []);
 
-  // Cada vez que cambia la categoría seleccionada se llama a la API de weighted-skills
   useEffect(() => {
     if (selectedCategory) {
       const fetchWeightedData = async () => {
@@ -57,23 +63,23 @@ const JobRecommendations = ({ skills }) => {
     }
   }, [selectedCategory]);
 
-  // Función para eliminar una skill de la lista del usuario
+  // Funciones para agregar/eliminar skills del usuario
   const handleDeleteSkill = (skillToDelete) => {
     setUserSkills(userSkills.filter((skill) => skill !== skillToDelete));
   };
 
-  // Función para agregar una skill (desde las recomendadas) a la lista del usuario
   const handleAddSkill = (skillToAdd) => {
     if (!userSkills.some((s) => s.toLowerCase() === skillToAdd.toLowerCase())) {
       setUserSkills([...userSkills, skillToAdd]);
     }
   };
 
-  // Funciones para obtener recomendaciones de trabajos (lógica original)
+  // --- Funciones para obtener ofertas de trabajo ---
   const fetchRecommendedJobIds = async (userSkillsList) => {
     const url = "https://api-emplea-data.onrender.com/recommend_jobs/";
+    // Se solicita un top_n alto para obtener muchos IDs y poder paginar localmente
     const params = {
-      top_n: 10,
+      top_n: 100,
       similarity_threshold: 0.35,
     };
     const jsonData = { user_skills: userSkillsList };
@@ -134,22 +140,86 @@ const JobRecommendations = ({ skills }) => {
     }
   };
 
-  // Actualizar las ofertas de trabajo con debounce de 2 segundos al cambiar las skills del usuario
+  // Al cambiar las skills del usuario, se obtienen los IDs recomendados y se carga la primera tanda de ofertas
   useEffect(() => {
-    const timer = setTimeout(async () => {
+    const fetchJobs = async () => {
       if (userSkills && userSkills.length > 0) {
         setLoading(true);
         const jobIds = await fetchRecommendedJobIds(userSkills);
-        const jobDetails = await fetchJobDetailsByIds(jobIds);
-        setJobs(jobDetails);
+        setAllJobIds(jobIds);
+        if (jobIds.length > 0) {
+          const initialJobIds = jobIds.slice(0, jobsPerPage);
+          const jobDetails = await fetchJobDetailsByIds(initialJobIds);
+          setJobs(jobDetails);
+          setJobOffset(jobsPerPage);
+        } else {
+          setJobs([]);
+          setJobOffset(0);
+        }
         setLoading(false);
       }
-    }, 2000);
-
-    return () => clearTimeout(timer);
+    };
+    fetchJobs();
   }, [userSkills]);
 
-  // Función para calcular la "Demanda" (número de ocurrencias y % sobre total)
+  // Al cambiar el número de ofertas por página, se reinicia la paginación (usando los IDs ya obtenidos)
+  useEffect(() => {
+    const resetJobs = async () => {
+      if (allJobIds.length > 0) {
+        setLoading(true);
+        const initialJobIds = allJobIds.slice(0, jobsPerPage);
+        const jobDetails = await fetchJobDetailsByIds(initialJobIds);
+        setJobs(jobDetails);
+        setJobOffset(jobsPerPage);
+        setLoading(false);
+      }
+    };
+    resetJobs();
+  }, [jobsPerPage, allJobIds]);
+
+  // Función para cargar la siguiente tanda de ofertas
+  const loadMoreJobs = async () => {
+    if (jobOffset >= allJobIds.length) return;
+    setLoadingMore(true);
+    const nextJobIds = allJobIds.slice(jobOffset, jobOffset + jobsPerPage);
+    const moreJobDetails = await fetchJobDetailsByIds(nextJobIds);
+    setJobs((prevJobs) => [...prevJobs, ...moreJobDetails]);
+    setJobOffset(jobOffset + jobsPerPage);
+    setLoadingMore(false);
+  };
+
+  // Observer que dispara la carga de más ofertas cuando el spinner es visible
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 1.0,
+    };
+
+    const observerCallback = (entries) => {
+      if (
+        entries[0].isIntersecting &&
+        !loadingMore &&
+        !loading &&
+        jobOffset < allJobIds.length
+      ) {
+        loadMoreJobs();
+      }
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [loaderRef, loadingMore, loading, jobOffset, allJobIds]);
+
+  // --- Funciones para Skills recomendadas y cálculo de demanda ---
   const calcularDemanda = (skillName) => {
     if (weightedData && weightedData.weighted_skills) {
       const match = weightedData.weighted_skills.find(
@@ -163,7 +233,6 @@ const JobRecommendations = ({ skills }) => {
     return `0 - 0%`;
   };
 
-  // Obtener las skills recomendadas: filtrar las que el usuario no tiene, ordenar por count y tomar las primeras según numRecommended
   const obtenerSkillsRecomendadas = () => {
     if (weightedData && weightedData.weighted_skills) {
       const recomendadas = weightedData.weighted_skills
@@ -182,7 +251,7 @@ const JobRecommendations = ({ skills }) => {
 
   return (
     <div className="mt-10 p-6 bg-gray-800 text-white rounded-xl">
-      {/* Contenedor para selector de categoría a la izquierda y ofertas totales a la derecha */}
+      {/* Contenedor para selector de categoría y total de ofertas */}
       <div className="mb-8 flex flex-col md:flex-row items-center justify-around">
         <div className="flex items-center gap-4">
           <label htmlFor="category-selector" className="text-2xl mt-1 block mb-2 font-bold">
@@ -207,7 +276,7 @@ const JobRecommendations = ({ skills }) => {
         </div>
       </div>
 
-      {/* Contenedor responsivo para las dos tablas */}
+      {/* Contenedor responsivo para las tablas de Skills Identificadas y Recomendadas */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Tabla de Skills Identificadas */}
         <div className="w-full md:w-1/2">
@@ -308,26 +377,39 @@ const JobRecommendations = ({ skills }) => {
 
       {/* Sección de Recomendaciones de Trabajo */}
       <div>
-        <h3 className="text-lg font-bold mb-4">Recomendaciones de Trabajo</h3>
+        <div className="flex justify-between items-center gap-4 mb-4">
+          <h3 className="text-3xl font-bold">Recomendaciones de Trabajo</h3>
+          <div className="flex items-center gap-2">
+            <label htmlFor="jobsPerPage" className="text-2xl font-bold">
+              Ofertas por página:
+            </label>
+            <input
+              id="jobsPerPage"
+              type="number"
+              min="1"
+              value={jobsPerPage}
+              onChange={(e) => setJobsPerPage(parseInt(e.target.value, 10) || 1)}
+              className="w-16 text-xl text-center rounded bg-gray-600 text-white py-0.5"
+            />
+          </div>
+        </div>
         {loading ? (
           <p>Obteniendo las mejores ofertas para ti...</p>
         ) : jobs.length > 0 ? (
           <div className="space-y-6">
             {jobs.map((job) => (
               <div key={job._id} className="bg-white shadow-lg rounded-lg p-6 text-gray-900">
-                {/* Título y Empresa */}
                 <h2 className="text-3xl font-bold mb-2">{job.Titulo}</h2>
                 <p className="text-base text-gray-600 mb-4">
                   {job.Empresa} - {job.Ubicacion}
                 </p>
-
-                {/* Contenedor responsivo para detalles */}
-                <div className="flex flex-col md:flex-row gap-10">
-                  {/* Información Principal */}
+                <div className="flex flex-col md:flex-row gap-8">
                   <div className="mb-4">
                     <p>
                       <span className="text-lg font-semibold">Salario:</span>{" "}
-                      {Array.isArray(job.Salario) ? job.Salario.join("€  - ") + "€" : job.Salario}
+                      {(Array.isArray(job.Salario) && job.Salario.length > 1)
+                        ? job.Salario.join("€ - ") + "€"
+                        : job.Salario}
                     </p>
                     <p>
                       <span className="text-lg font-semibold">Experiencia mínima:</span>{" "}
@@ -344,8 +426,6 @@ const JobRecommendations = ({ skills }) => {
                         : job["Estudios minimos"]}
                     </p>
                   </div>
-
-                  {/* Skills del Job */}
                   <div>
                     <p className="text-lg font-semibold mb-2 flex items-center gap-4">
                       Skills:
@@ -360,16 +440,12 @@ const JobRecommendations = ({ skills }) => {
                     </p>
                   </div>
                 </div>
-
-                {/* Descripción truncada a 3 líneas, mostrando el resto al pasar el cursor */}
                 <p className="text-xl font-semibold">Descripción</p>
                 <div className="group">
                   <p className="mb-4 max-h-[4.5rem] overflow-hidden transition-all duration-[670ms] ease-in-out group-hover:max-h-[500px]">
                     {job.Descripcion}
                   </p>
                 </div>
-
-                {/* Datos Adicionales */}
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-gray-500 mb-4">
                     <p>
@@ -385,7 +461,6 @@ const JobRecommendations = ({ skills }) => {
                       <span className="font-semibold">Fecha:</span> {job.fecha}
                     </p>
                   </div>
-
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
@@ -397,6 +472,17 @@ const JobRecommendations = ({ skills }) => {
                 </div>
               </div>
             ))}
+            {/* Spinner para cargar más ofertas (observado por el IntersectionObserver) */}
+            {jobOffset < allJobIds.length && (
+              <div ref={loaderRef} className="flex justify-center items-center py-4">
+                {loadingMore && (
+                  <svg className="animate-spin h-8 w-8 text-white" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <p>No se encontraron ofertas de trabajo.</p>
