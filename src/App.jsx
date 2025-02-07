@@ -44,7 +44,6 @@ const App = () => {
           <Hero />
         </div>
         <About />
-        <BarChartComponent />
         <Tech />
         <Feedbacks />
         <Contact />
