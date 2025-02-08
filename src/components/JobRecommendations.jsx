@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { skillsDocumentation } from "../constants";
 import {
   BarChart,
   Bar,
@@ -10,6 +11,14 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+
+// Función para normalizar las skills (minúsculas, sin acentos y sin espacios extra)
+const normalizeSkill = (skill) =>
+  skill
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
 
 const JobRecommendations = ({ skills }) => {
   // Estados para trabajos y paginación
@@ -76,11 +85,11 @@ const JobRecommendations = ({ skills }) => {
 
   // Funciones para agregar/eliminar skills del usuario
   const handleDeleteSkill = (skillToDelete) => {
-    setUserSkills(userSkills.filter((skill) => skill !== skillToDelete));
+    setUserSkills(userSkills.filter((skill) => normalizeSkill(skill) !== normalizeSkill(skillToDelete)));
   };
 
   const handleAddSkill = (skillToAdd) => {
-    if (!userSkills.some((s) => s.toLowerCase() === skillToAdd.toLowerCase())) {
+    if (!userSkills.some((s) => normalizeSkill(s) === normalizeSkill(skillToAdd))) {
       setUserSkills([...userSkills, skillToAdd]);
     }
   };
@@ -234,7 +243,7 @@ const JobRecommendations = ({ skills }) => {
   const calcularDemanda = (skillName) => {
     if (weightedData && weightedData.weighted_skills) {
       const match = weightedData.weighted_skills.find(
-        (ws) => ws.skill.toLowerCase() === skillName.toLowerCase()
+        (ws) => normalizeSkill(ws.skill) === normalizeSkill(skillName)
       );
       if (match) {
         const porcentaje = ((match.count / weightedData.total_offers) * 100).toFixed(2);
@@ -250,7 +259,7 @@ const JobRecommendations = ({ skills }) => {
         .filter(
           (ws) =>
             !userSkills.some(
-              (userSkill) => userSkill.toLowerCase() === ws.skill.toLowerCase()
+              (userSkill) => normalizeSkill(userSkill) === normalizeSkill(ws.skill)
             )
         )
         .sort((a, b) => b.count - a.count)
@@ -304,7 +313,7 @@ const JobRecommendations = ({ skills }) => {
                     key={`cell-${index}`}
                     fill={
                       userSkills.some(
-                        (us) => us.toLowerCase() === entry.skill.toLowerCase()
+                        (us) => normalizeSkill(us) === normalizeSkill(entry.skill)
                       )
                         ? "#82ca9d" // Color resaltado para skills identificadas
                         : "#8884d8" // Color por defecto para el resto
@@ -339,20 +348,33 @@ const JobRecommendations = ({ skills }) => {
               </tr>
             </thead>
             <tbody>
-              {userSkills.map((skill, index) => (
-                <tr key={index}>
-                  <td className="border px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleDeleteSkill(skill)}
-                      className="bg-rose-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                  <td className="border px-4 py-2 text-center">{skill}</td>
-                  <td className="border px-4 py-2 text-center">{calcularDemanda(skill)}</td>
-                </tr>
-              ))}
+              {[...userSkills]
+                .sort((a, b) => {
+                  // Se busca la demanda (count) de cada skill usando la función normalizeSkill
+                  const wsA = weightedData && weightedData.weighted_skills.find(
+                    (ws) => normalizeSkill(ws.skill) === normalizeSkill(a)
+                  );
+                  const wsB = weightedData && weightedData.weighted_skills.find(
+                    (ws) => normalizeSkill(ws.skill) === normalizeSkill(b)
+                  );
+                  const countA = wsA ? wsA.count : 0;
+                  const countB = wsB ? wsB.count : 0;
+                  return countB - countA;
+                })
+                .map((skill, index) => (
+                  <tr key={index}>
+                    <td className="border px-4 py-2 text-center">
+                      <button
+                        onClick={() => handleDeleteSkill(skill)}
+                        className="bg-rose-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
+                    <td className="border px-4 py-2 text-center">{skill}</td>
+                    <td className="border px-4 py-2 text-center">{calcularDemanda(skill)}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -367,9 +389,7 @@ const JobRecommendations = ({ skills }) => {
                 type="number"
                 min="1"
                 value={numRecommended}
-                onChange={(e) =>
-                  setNumRecommended(parseInt(e.target.value, 10) || 1)
-                }
+                onChange={(e) => setNumRecommended(parseInt(e.target.value, 10) || 1)}
                 className="w-16 text-center rounded bg-gray-600 text-white py-0.5"
               />
             </div>
@@ -377,7 +397,7 @@ const JobRecommendations = ({ skills }) => {
           <table className="mt-3 min-w-full bg-gray-700 rounded">
             <thead>
               <tr>
-                <th className="px-4 py-2 text-center">Skill Recomendadas</th>
+                <th className="px-4 py-2 text-center">Skill Recomendada</th>
                 <th className="px-4 py-2 text-center">
                   Demanda
                   <span
@@ -387,6 +407,7 @@ const JobRecommendations = ({ skills }) => {
                     ?
                   </span>
                 </th>
+                <th className="px-4 py-2 text-center">Doc.</th>
               </tr>
             </thead>
             <tbody>
@@ -396,17 +417,46 @@ const JobRecommendations = ({ skills }) => {
                   return (
                     <tr
                       key={index}
-                      className="cursor-pointer hover:bg-gray-600 py-5"
+                      className="cursor-pointer text-center hover:bg-gray-600 py-5"
                       onClick={() => handleAddSkill(ws.skill)}
                     >
                       <td className="border px-4 py-2 text-center">{ws.skill}</td>
                       <td className="border px-4 py-2 text-center">{`${ws.count} - ${porcentaje}%`}</td>
+                      <td className="border px-4 py-2 text-center">
+                        {skillsDocumentation[normalizeSkill(ws.skill)] ? (
+                          <a
+                            href={skillsDocumentation[normalizeSkill(ws.skill)]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            title={`Ver documentación de ${ws.skill}`}
+                            className="flex justify-center"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-6 w-6 text-blue-400 hover:text-blue-200"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20 10 10 0 010-20z"
+                              />
+                            </svg>
+                          </a>
+                        ) : (
+                          <span className="text-gray-500">N/A</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td className="border px-4 py-2 text-center" colSpan="2">
+                  <td className="border px-4 py-2 text-center" colSpan="3">
                     Cargando recomendaciones...
                   </td>
                 </tr>

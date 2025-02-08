@@ -249,5 +249,94 @@ const dataTips = [
   "¿Cuál es el colmo de un programador? Que su vida no compile con sus expectativas."
 ];
 
+const skillsDocumentationExtended = {
+  "azure": "https://learn.microsoft.com/en-us/azure/",
+  "data mining": "https://en.wikipedia.org/wiki/Data_mining",
+  "estadística descriptiva": "https://es.wikipedia.org/wiki/Estad%C3%ADstica_descriptiva",
+  "auditoria de datos": "https://www.google.com/search?q=auditor%C3%ADa+de+datos",
+  "kubernetes": "https://kubernetes.io/docs/home/",
+  "gcp": "https://cloud.google.com/docs",
+  "analisis crítico": "https://www.google.com/search?q=an%C3%A1lisis+cr%C3%ADtico",
+  "google cloud": "https://cloud.google.com/docs",
+  "nlp": "https://en.wikipedia.org/wiki/Natural_language_processing",
+  "apachespark": "https://spark.apache.org/docs/latest/",
+  "analisis critico": "https://www.google.com/search?q=an%C3%A1lisis+critico",
+  "analisis": "https://www.google.com/search?q=an%C3%A1lisis",
+  "data lakes": "https://www.google.com/search?q=data+lakes",
+  "statistics": "https://en.wikipedia.org/wiki/Statistics",
+  "etl processes": "https://www.google.com/search?q=etl+processes",
+  "visualización de datos": "https://www.google.com/search?q=visualizaci%C3%B3n+de+datos",
+  "pytorch": "https://pytorch.org/docs/",
+  "excel": "https://support.microsoft.com/en-us/excel",
+  "r": "https://www.r-project.org/",
+  "seguridad": "https://www.google.com/search?q=seguridad",
+  "seguridad de sistemas": "https://www.google.com/search?q=seguridad+de+sistemas",
+  "big data tools": "https://www.google.com/search?q=big+data+tools",
+  "hadoop": "https://hadoop.apache.org/docs/",
+  "datalakes": "https://www.google.com/search?q=datalakes",
+  "apache spark": "https://spark.apache.org/docs/latest/",
+  "data analysis": "https://en.wikipedia.org/wiki/Data_analysis",
+  "bigdata": "https://en.wikipedia.org/wiki/Big_data",
+  "machine learning": "https://www.google.com/search?q=machine+learning",
+  "sql": "https://www.w3schools.com/sql/",
+  "analisis predictivo": "https://www.google.com/search?q=an%C3%A1lisis+predictivo",
+  "apache kafka": "https://kafka.apache.org/documentation/",
+  "estadistica descriptiva": "https://es.wikipedia.org/wiki/Estad%C3%ADstica_descriptiva",
+  "gdpr": "https://gdpr-info.eu/",
+  "powerbi": "https://learn.microsoft.com/en-us/power-bi/",
+  "analisiscritico": "https://www.google.com/search?q=an%C3%A1lisiscritico",
+  "cloud platforms": "https://www.google.com/search?q=cloud+platforms",
+  "iso 27001": "https://www.iso.org/iso-27001-information-security.html",
+  "aws": "https://aws.amazon.com/documentation/",
+  "tensorflow": "https://www.tensorflow.org/learn",
+  "data warehouses": "https://www.google.com/search?q=data+warehouses",
+  "trabajoenequipo": "https://www.google.com/search?q=trabajo+en+equipo",
+  "Estado no completado": "https://www.google.com/search?q=estado+no+completado",
+  "comunicacion": "https://www.google.com/search?q=comunicaci%C3%B3n",
+  "auditoría de datos": "https://www.google.com/search?q=auditor%C3%ADa+de+datos",
+  "comunicacion efectiva": "https://www.google.com/search?q=comunicación+efectiva",
+  "comunicación": "https://www.google.com/search?q=comunicación",
+  "análisis crítico": "https://www.google.com/search?q=an%C3%A1lisis+cr%C3%ADtico",
+  "bi": "https://www.google.com/search?q=business+intelligence",
+  "gestión de riesgos": "https://www.google.com/search?q=gesti%C3%B3n+de+riesgos",
+  "tableau": "https://www.tableau.com/learn/training",
+  "visualizacion": "https://www.google.com/search?q=visualizaci%C3%B3n",
+  "docker": "https://docs.docker.com/",
+  "data warehousing": "https://www.google.com/search?q=data+warehousing",
+  "visualización": "https://www.google.com/search?q=visualizaci%C3%B3n",
+  "data visualization": "https://en.wikipedia.org/wiki/Data_visualization",
+  "spark": "https://spark.apache.org/docs/latest/",
+  "etl": "https://www.google.com/search?q=etl",
+  "kafka": "https://kafka.apache.org/documentation/",
+  "sistemas de seguridad": "https://www.google.com/search?q=sistemas+de+seguridad",
+  "nosql": "https://www.google.com/search?q=nosql",
+  "análisis de datos": "https://en.wikipedia.org/wiki/Data_analysis",
+  "elt": "https://www.google.com/search?q=elt",
+  "cloud computing": "https://www.google.com/search?q=cloud+computing",
+  "analisis de datos": "https://www.google.com/search?q=an%C3%A1lisis+de+datos",
+  "big data": "https://en.wikipedia.org/wiki/Big_data",
+  "gestion de riesgos": "https://www.google.com/search?q=gesti%C3%B3n+de+riesgos",
+  "iso27001": "https://www.iso.org/iso-27001-information-security.html",
+  "keras": "https://keras.io/",
+  "airflow": "https://airflow.apache.org/docs/",
+  "datawarehouses": "https://www.google.com/search?q=data+warehouses",
+  "visualizacion de datos": "https://www.google.com/search?q=visualizaci%C3%B3n+de+datos",
+  "deep learning": "https://en.wikipedia.org/wiki/Deep_learning",
+  "trabajo en equipo": "https://www.google.com/search?q=trabajo+en+equipo",
+  "python": "https://docs.python.org/3/"
+};
+// Función para normalizar (pasar a minúsculas y eliminar acentos)
+const normalizeSkill = (skill) =>
+  skill
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
+// Creamos un objeto con las claves ya normalizadas
+export const skillsDocumentation = Object.keys(skillsDocumentationExtended).reduce((acc, key) => {
+  acc[normalizeSkill(key)] = skillsDocumentationExtended[key];
+  return acc;
+}, {});
 
 export { services, technologies, experiences, testimonials, projects, dataTips };

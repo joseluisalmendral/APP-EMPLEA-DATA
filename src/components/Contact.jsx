@@ -19,6 +19,10 @@ const Contact = () => {
   const [showTick, setShowTick] = useState(false);
   const [skills, setSkills] = useState([]);
 
+  // Refs para contar clics y registrar el momento del primer clic
+  const clickCountRef = useRef(0);
+  const firstClickTimeRef = useRef(null);
+
   // Actualiza dataTip de forma aleatoria cada 9 segundos cuando se está cargando
   useEffect(() => {
     if (loading) {
@@ -73,7 +77,7 @@ const Contact = () => {
 
     // Simulamos un retardo en la respuesta de la API (por ejemplo, 2 segundos)
     setTimeout(() => {
-      const simulatedSkills = ["excel", 'powerbi'];
+      const simulatedSkills = ["excel", "powerbi", "python", "sql"];
       console.log("Simulación de API, skills recibidas:", simulatedSkills);
       setSkills(simulatedSkills);
       setUploadComplete(true);
@@ -144,38 +148,36 @@ const Contact = () => {
     }
   };
 
-  // useEffect para detectar la combinación de teclas (a, s, d, f)
-  useEffect(() => {
-    const pressedKeys = new Set();
+  // Función para detectar 4 clics en el componente <EarthCanvas /> en menos de 6 segundos
+  const handleEarthCanvasClick = () => {
+    if (loading) return; // Evita iniciar una nueva simulación si ya se está cargando
 
-    const keydownHandler = (e) => {
-      pressedKeys.add(e.key.toLowerCase());
-      // Si se han presionado a, s, d y f al mismo tiempo
-      if (
-        pressedKeys.has("a") &&
-        pressedKeys.has("s") &&
-        pressedKeys.has("d") &&
-        pressedKeys.has("f")
-      ) {
-        // Solo si no se está ya cargando (para evitar múltiples simulaciones)
-        if (!loading) {
+    const now = Date.now();
+    if (!firstClickTimeRef.current) {
+      // Primer clic: se registra el tiempo inicial y se establece el contador en 1
+      firstClickTimeRef.current = now;
+      clickCountRef.current = 1;
+    } else {
+      const diffSeconds = (now - firstClickTimeRef.current) / 1000;
+      if (diffSeconds > 6) {
+        // Si han pasado más de 6 segundos, reiniciamos el contador
+        firstClickTimeRef.current = now;
+        clickCountRef.current = 1;
+      } else {
+        // Si estamos dentro del límite, incrementamos el contador
+        clickCountRef.current += 1;
+        if (clickCountRef.current >= 4) {
           simulateApiCall();
+          // Reiniciamos el contador después de activar la simulación
+          clickCountRef.current = 0;
+          firstClickTimeRef.current = null;
         }
       }
-    };
+    }
+  };
 
-    const keyupHandler = (e) => {
-      pressedKeys.delete(e.key.toLowerCase());
-    };
-
-    document.addEventListener("keydown", keydownHandler);
-    document.addEventListener("keyup", keyupHandler);
-
-    return () => {
-      document.removeEventListener("keydown", keydownHandler);
-      document.removeEventListener("keyup", keyupHandler);
-    };
-  }, [loading, intervalId]);
+  // Se ha eliminado el useEffect que detectaba la combinación de teclas (a, s, d, f)
+  // ya que ahora la simulación se activa con 4 clics en <EarthCanvas />.
 
   return (
     <>
@@ -231,7 +233,10 @@ const Contact = () => {
           variants={slideIn("right", "tween", 0.2, 1)}
           className="xl:flex-1 xl:h-auto md:h-[550px] h-[350px]"
         >
-          <EarthCanvas />
+          {/* Se envuelve <EarthCanvas /> en un div que detecta los clics */}
+          <div onClick={handleEarthCanvasClick} className="w-full h-full">
+            <EarthCanvas />
+          </div>
         </motion.div>
       </div>
 
