@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { skillsDocumentation } from "../constants";
 import {
   BarChart,
   Bar,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Brush,
 } from "recharts";
 
 // Función para normalizar las skills (minúsculas, sin acentos y sin espacios extra)
@@ -85,11 +85,19 @@ const JobRecommendations = ({ skills }) => {
 
   // Funciones para agregar/eliminar skills del usuario
   const handleDeleteSkill = (skillToDelete) => {
-    setUserSkills(userSkills.filter((skill) => normalizeSkill(skill) !== normalizeSkill(skillToDelete)));
+    setUserSkills(
+      userSkills.filter(
+        (skill) => normalizeSkill(skill) !== normalizeSkill(skillToDelete)
+      )
+    );
   };
 
   const handleAddSkill = (skillToAdd) => {
-    if (!userSkills.some((s) => normalizeSkill(s) === normalizeSkill(skillToAdd))) {
+    if (
+      !userSkills.some(
+        (s) => normalizeSkill(s) === normalizeSkill(skillToAdd)
+      )
+    ) {
       setUserSkills([...userSkills, skillToAdd]);
     }
   };
@@ -97,7 +105,6 @@ const JobRecommendations = ({ skills }) => {
   // --- Funciones para obtener ofertas de trabajo ---
   const fetchRecommendedJobIds = async (userSkillsList) => {
     const url = "https://api-emplea-data.onrender.com/recommend_jobs/";
-    // Se solicita un top_n alto para obtener muchos IDs y poder paginar localmente
     const params = {
       top_n: 100,
       similarity_threshold: 0.35,
@@ -160,7 +167,6 @@ const JobRecommendations = ({ skills }) => {
     }
   };
 
-  // Al cambiar las skills del usuario, se obtienen los IDs recomendados y se carga la primera tanda de ofertas
   useEffect(() => {
     const fetchJobs = async () => {
       if (userSkills && userSkills.length > 0) {
@@ -182,7 +188,6 @@ const JobRecommendations = ({ skills }) => {
     fetchJobs();
   }, [userSkills]);
 
-  // Al cambiar el número de ofertas por página, se reinicia la paginación (usando los IDs ya obtenidos)
   useEffect(() => {
     const resetJobs = async () => {
       if (allJobIds.length > 0) {
@@ -197,7 +202,6 @@ const JobRecommendations = ({ skills }) => {
     resetJobs();
   }, [jobsPerPage, allJobIds]);
 
-  // Función para cargar la siguiente tanda de ofertas
   const loadMoreJobs = async () => {
     if (jobOffset >= allJobIds.length) return;
     setLoadingMore(true);
@@ -208,7 +212,6 @@ const JobRecommendations = ({ skills }) => {
     setLoadingMore(false);
   };
 
-  // Observer que dispara la carga de más ofertas cuando el spinner es visible
   useEffect(() => {
     const observerOptions = {
       root: null,
@@ -269,9 +272,52 @@ const JobRecommendations = ({ skills }) => {
     return [];
   };
 
+  // Memorizar la data del gráfico para evitar re-render innecesario que reinicie el Brush.
+  const barData = useMemo(() => {
+    if (!weightedData || !weightedData.weighted_skills) return [];
+    return weightedData.weighted_skills.map((entry) => ({
+      ...entry,
+      fill: userSkills.some(
+        (us) => normalizeSkill(us) === normalizeSkill(entry.skill)
+      )
+        ? "#82ca9d" // Verde si la skill ya está en las identificadas
+        : "#8884d8", // Color por defecto
+    }));
+  }, [weightedData, userSkills]);
+
+  // Calcular la mediana usando TODAS las skills representadas en la gráfica
+  const median = useMemo(() => {
+    if (!weightedData || !weightedData.weighted_skills || weightedData.weighted_skills.length === 0)
+      return 0;
+    const counts = weightedData.weighted_skills.map(ws => ws.count);
+    counts.sort((a, b) => a - b);
+    const mid = Math.floor(counts.length / 2);
+    return counts.length % 2 !== 0 ? counts[mid] : (counts[mid - 1] + counts[mid]) / 2;
+  }, [weightedData]);
+
+  // Función para renderizar cada barra de forma personalizada
+  const renderCustomBar = (props) => {
+    const { x, y, width, height, payload } = props;
+    return (
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill={payload.fill}
+        style={{ cursor: "pointer" }}
+        onClick={() => {
+          if (payload && payload.skill) {
+            handleAddSkill(payload.skill);
+          }
+        }}
+      />
+    );
+  };
+
   return (
     <div className="mt-10 p-6 bg-gray-800 text-white rounded-xl">
-      {/* Contenedor para selector de categoría y total de ofertas */}
+      {/* Selector de categoría y total de ofertas */}
       <div className="mb-8 flex flex-col md:flex-row items-center justify-around">
         <div className="flex items-center gap-4">
           <label htmlFor="category-selector" className="text-2xl mt-1 block mb-2 font-bold">
@@ -301,32 +347,39 @@ const JobRecommendations = ({ skills }) => {
         <div className="mb-8">
           <h3 className="text-2xl font-bold text-center mb-4">Skills más demandadas</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={weightedData.weighted_skills} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <BarChart
+              data={barData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#555" />
+              {/* Eje X con las skills */}
               <XAxis dataKey="skill" tick={{ fill: "#fff" }} />
-              <YAxis tick={{ fill: "#fff" }} />
-              <Tooltip contentStyle={{ backgroundColor: "#333", border: "none" }} labelStyle={{ color: "#fff" }} />
+              {/* Eje Y numérico con label "Cantidad" */}
+              <YAxis
+                tick={{ fill: "#fff" }}
+                label={{
+                  value: "Cantidad",
+                  angle: -90,
+                  position: "insideLeft",
+                  fill: "#fff",
+                }}
+              />
+              <Tooltip
+                contentStyle={{ backgroundColor: "#f0f0f0", border: "none" }}
+                labelStyle={{ color: "#000" }}
+                itemStyle={{ color: "#000" }}
+              />
+              {/* Brush sobre el eje X sin ticks */}
+              <Brush dataKey="skill" height={30} stroke="#8884d8" tickFormatter={() => ""} />
               <Legend wrapperStyle={{ color: "#fff" }} />
-              <Bar dataKey="count">
-                {weightedData.weighted_skills.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      userSkills.some(
-                        (us) => normalizeSkill(us) === normalizeSkill(entry.skill)
-                      )
-                        ? "#82ca9d" // Color resaltado para skills identificadas
-                        : "#8884d8" // Color por defecto para el resto
-                    }
-                  />
-                ))}
-              </Bar>
+              {/* Usamos renderCustomBar en lugar de <Cell> para evitar problemas de índices */}
+              <Bar dataKey="count" shape={renderCustomBar} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      {/* Contenedor responsivo para las tablas de Skills Identificadas y Recomendadas */}
+      {/* Tablas de Skills Identificadas y Recomendadas */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Tabla de Skills Identificadas */}
         <div className="w-full md:w-1/2">
@@ -350,31 +403,54 @@ const JobRecommendations = ({ skills }) => {
             <tbody>
               {[...userSkills]
                 .sort((a, b) => {
-                  // Se busca la demanda (count) de cada skill usando la función normalizeSkill
-                  const wsA = weightedData && weightedData.weighted_skills.find(
-                    (ws) => normalizeSkill(ws.skill) === normalizeSkill(a)
-                  );
-                  const wsB = weightedData && weightedData.weighted_skills.find(
-                    (ws) => normalizeSkill(ws.skill) === normalizeSkill(b)
-                  );
+                  const wsA =
+                    weightedData &&
+                    weightedData.weighted_skills.find(
+                      (ws) => normalizeSkill(ws.skill) === normalizeSkill(a)
+                    );
+                  const wsB =
+                    weightedData &&
+                    weightedData.weighted_skills.find(
+                      (ws) => normalizeSkill(ws.skill) === normalizeSkill(b)
+                    );
                   const countA = wsA ? wsA.count : 0;
                   const countB = wsB ? wsB.count : 0;
                   return countB - countA;
                 })
-                .map((skill, index) => (
-                  <tr key={index}>
-                    <td className="border px-4 py-2 text-center">
-                      <button
-                        onClick={() => handleDeleteSkill(skill)}
-                        className="bg-rose-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                    <td className="border px-4 py-2 text-center">{skill}</td>
-                    <td className="border px-4 py-2 text-center">{calcularDemanda(skill)}</td>
-                  </tr>
-                ))}
+                .map((skill, index) => {
+                  const match =
+                    weightedData &&
+                    weightedData.weighted_skills.find(
+                      (ws) => normalizeSkill(ws.skill) === normalizeSkill(skill)
+                    );
+                  const count = match ? match.count : 0;
+                  let rowColor = "";
+                  if (median > 0) {
+                    if (count >= median * 1.4) {
+                      rowColor = "#a8e78e"; // verde suave
+                    } else if (count < median * 0.75) {
+                      rowColor = "#f3a9a9"; // rojo suave
+                    } else {
+                      rowColor = "#fff2a0"; // amarillo suave
+                    }
+                  }
+                  return (
+                    <tr key={index}>
+                      <td className="border px-4 py-2 text-center">
+                        <button
+                          onClick={() => handleDeleteSkill(skill)}
+                          className="bg-rose-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                      <td className="border px-4 py-2 text-center">{skill}</td>
+                      <td className="border px-4 py-2 text-center" style={{ color: rowColor }}>
+                        {calcularDemanda(skill)}
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
@@ -389,7 +465,9 @@ const JobRecommendations = ({ skills }) => {
                 type="number"
                 min="1"
                 value={numRecommended}
-                onChange={(e) => setNumRecommended(parseInt(e.target.value, 10) || 1)}
+                onChange={(e) =>
+                  setNumRecommended(parseInt(e.target.value, 10) || 1)
+                }
                 className="w-16 text-center rounded bg-gray-600 text-white py-0.5"
               />
             </div>
@@ -563,7 +641,6 @@ const JobRecommendations = ({ skills }) => {
                 </div>
               </div>
             ))}
-            {/* Spinner para cargar más ofertas (observado por el IntersectionObserver) */}
             {jobOffset < allJobIds.length && (
               <div ref={loaderRef} className="flex justify-center items-center py-4">
                 {loadingMore && (
