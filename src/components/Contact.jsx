@@ -77,7 +77,7 @@ const Contact = () => {
 
     // Simulamos un retardo en la respuesta de la API (por ejemplo, 2 segundos)
     setTimeout(() => {
-      const simulatedSkills = ["excel", "powerbi", "python", "sql"];
+      const simulatedSkills = ['gdpr', 'iso 27001', 'auditoria de datos']; //"excel", "powerbi", "python", "sql"
       console.log("Simulación de API, skills recibidas:", simulatedSkills);
       setSkills(simulatedSkills);
       setUploadComplete(true);

@@ -51,8 +51,7 @@ const JobRecommendations = ({ skills }) => {
           if (data.categories && data.categories.length > 0) {
             console.log("Categories from /categories API:", data.categories);
             setCategories(data.categories);
-            // Inicialmente se asigna la primera categoría
-            setSelectedCategory(data.categories[0]);
+            // No se asigna valor por defecto aquí; se esperará la clasificación
           }
         } else {
           console.error("Error al obtener categorías:", response.status);
@@ -88,13 +87,16 @@ const JobRecommendations = ({ skills }) => {
             if (data.role && categories.includes(data.role)) {
               setSelectedCategory(data.role);
             } else {
+              // Si no, se asigna la primera categoría como valor por defecto
               setSelectedCategory(categories[0]);
             }
           } else {
             console.error("Error en la clasificación de skills:", response.status);
+            setSelectedCategory(categories[0]);
           }
         } catch (error) {
           console.error("Error al clasificar skills:", error);
+          setSelectedCategory(categories[0]);
         } finally {
           setInitialClassificationDone(true);
         }
@@ -372,12 +374,17 @@ const JobRecommendations = ({ skills }) => {
             className="p-2 rounded bg-white text-black"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
+            disabled={!initialClassificationDone}
           >
-            {categories.map((category, index) => (
-              <option key={index} value={category}>
-                {category}
-              </option>
-            ))}
+            {!initialClassificationDone ? (
+              <option value="">Cargando clasificación...</option>
+            ) : (
+              categories.map((category, index) => (
+                <option key={index} value={category}>
+                  {category}
+                </option>
+              ))
+            )}
           </select>
         </div>
         <div className="mt-4 text-2xl md:mt-0">
