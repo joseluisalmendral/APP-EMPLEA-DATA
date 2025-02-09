@@ -48,7 +48,6 @@ const App = () => {
         <About />
         <JobOffersChartOverTime />
         <LocationDistributionChart />
-        <Tech />
         <Feedbacks />
         <Contact />
         <StarsCanvasWrapper />
