@@ -22,8 +22,8 @@ export const navLinks = [
     title: "Mercado Laboral",
   },
   {
-    id: "work",
-    title: "Sobre Nosotros",
+    id: "feedbacks",
+    title: "Opiniones",
   },
   {
     id: "contact",
