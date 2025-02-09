@@ -35,11 +35,13 @@ const JobRecommendations = ({ skills }) => {
   const [weightedData, setWeightedData] = useState(null);
   const [userSkills, setUserSkills] = useState(skills);
   const [numRecommended, setNumRecommended] = useState(5);
+  // Estado para asegurarnos de que la clasificación se haga sólo la primera vez
+  const [initialClassificationDone, setInitialClassificationDone] = useState(false);
 
   // Ref para el contenedor del spinner (loader)
   const loaderRef = useRef(null);
 
-  // --- Categorías y weighted skills ---
+  // --- Obtención de Categorías ---
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -47,8 +49,10 @@ const JobRecommendations = ({ skills }) => {
         if (response.ok) {
           const data = await response.json();
           if (data.categories && data.categories.length > 0) {
+            console.log("Categories from /categories API:", data.categories);
             setCategories(data.categories);
-            setSelectedCategory(data.categories[0]); // Selecciona la primera por defecto
+            // Inicialmente se asigna la primera categoría
+            setSelectedCategory(data.categories[0]);
           }
         } else {
           console.error("Error al obtener categorías:", response.status);
@@ -60,6 +64,46 @@ const JobRecommendations = ({ skills }) => {
     fetchCategories();
   }, []);
 
+  // --- Clasificación de Skills (se realiza sólo la primera vez) ---
+  useEffect(() => {
+    if (
+      !initialClassificationDone &&
+      categories.length > 0 &&
+      userSkills &&
+      userSkills.length > 0
+    ) {
+      const classifySkills = async () => {
+        try {
+          const response = await fetch("https://api-emplea-data.onrender.com/classify-skills/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ skills: userSkills }),
+          });
+          if (response.ok) {
+            const data = await response.json();
+            console.log("Classification response from /classify-skills API:", data);
+            // Si el rol devuelto se encuentra en las categorías, se asigna
+            if (data.role && categories.includes(data.role)) {
+              setSelectedCategory(data.role);
+            } else {
+              setSelectedCategory(categories[0]);
+            }
+          } else {
+            console.error("Error en la clasificación de skills:", response.status);
+          }
+        } catch (error) {
+          console.error("Error al clasificar skills:", error);
+        } finally {
+          setInitialClassificationDone(true);
+        }
+      };
+      classifySkills();
+    }
+  }, [initialClassificationDone, categories, userSkills]);
+
+  // --- Obtención de Weighted Skills al cambiar la categoría seleccionada ---
   useEffect(() => {
     if (selectedCategory) {
       const fetchWeightedData = async () => {
@@ -83,7 +127,7 @@ const JobRecommendations = ({ skills }) => {
     }
   }, [selectedCategory]);
 
-  // Funciones para agregar/eliminar skills del usuario
+  // --- Funciones para agregar/eliminar skills del usuario ---
   const handleDeleteSkill = (skillToDelete) => {
     setUserSkills(
       userSkills.filter(
@@ -352,9 +396,7 @@ const JobRecommendations = ({ skills }) => {
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#555" />
-              {/* Eje X con las skills */}
               <XAxis dataKey="skill" tick={{ fill: "#fff" }} />
-              {/* Eje Y numérico con label "Cantidad" */}
               <YAxis
                 tick={{ fill: "#fff" }}
                 label={{
@@ -369,10 +411,8 @@ const JobRecommendations = ({ skills }) => {
                 labelStyle={{ color: "#000" }}
                 itemStyle={{ color: "#000" }}
               />
-              {/* Brush sobre el eje X sin ticks */}
               <Brush dataKey="skill" height={30} stroke="#8884d8" tickFormatter={() => ""} />
               <Legend wrapperStyle={{ color: "#fff" }} />
-              {/* Usamos renderCustomBar en lugar de <Cell> para evitar problemas de índices */}
               <Bar dataKey="count" shape={renderCustomBar} />
             </BarChart>
           </ResponsiveContainer>
